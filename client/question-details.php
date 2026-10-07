@@ -1,3 +1,11 @@
+<?php
+$errors = [];
+if(isset($_SESSION['errors'])) {
+    $errors = $_SESSION['errors'];
+    unset($_SESSION['errors']);
+}
+?>
+
 <div class="container">
     <h1 class="heading">Question</h1>
     <div class="row">

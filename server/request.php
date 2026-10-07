@@ -6,10 +6,30 @@ include '../common/db.php';
 
 if(isset($_POST['signup'])) {
 
+    $errors = [];
+
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = $_POST['password'];
     $address = $_POST['address'];
+
+    if(empty($username)){
+        $errors['username'] = "Username is required";
+    }
+    if(empty($email)){
+        $errors['email'] = "Email is required";
+    }
+    if(empty($password)){
+        $errors['password'] = "Password is required";
+    }
+    if(empty($address)){
+        $errors['address'] = "Address is required";
+    }
+    if(!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        header("Location: /AskNest?signup=true");
+        exit;
+    }
 
     $user = $conn->prepare("Insert into users 
     (id, username, email, password, address)
@@ -27,10 +47,25 @@ if(isset($_POST['signup'])) {
     }
 
 } else if(isset($_POST['login'])) {
+
+    $errors = [];
+
     $email = $_POST['email'];
     $password = $_POST['password'];
     $username = "";
     $user_id = 0;
+
+    if(empty($email)){
+        $errors['email'] = "Email is required";
+    }
+    if(empty($password)){
+        $errors['password'] = "Password is required";
+    }
+    if(!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        header("Location: /AskNest?login=true");
+        exit;
+    }
 
     $query = "select * from users where email = '$email' and password = '$password'";
     $result = $conn->query($query);
@@ -46,7 +81,9 @@ if(isset($_POST['signup'])) {
         header("Location: /AskNest");
         exit;
     } else {
-        echo "New user not registered";
+        $errors['login'] = "Invalid email or password";
+        $_SESSION['errors'] = $errors;
+        header("Location: /AskNest?login=true");
     }
 
 } else if (isset($_GET['logout'])) {
@@ -57,10 +94,28 @@ if(isset($_POST['signup'])) {
 
 } else if (isset($_POST['ask'])) {
 
+    $errors = [];
+
     $title = $_POST['title'];
     $description = $_POST['description'];
     $category_id = $_POST['category'];
     $user_id = $_SESSION['user']['user_id'];
+
+    if(empty($title)){
+        $errors['title'] = "Title is required";
+    }
+    if(empty($description)){
+        $errors['description'] = "description is required";
+    }
+    if(empty($category_id)){
+        $errors['category_id'] = "category is required";
+    }
+    if(!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        header("Location: /AskNest?ask=true");
+        exit;
+    }
+    
 
     $question = $conn->prepare("INSERT INTO questions (id, title, description, category_id, user_id) VALUES (NULL, '$title', '$description', '$category_id', '$user_id')");
     $result = $question->execute();
@@ -73,9 +128,21 @@ if(isset($_POST['signup'])) {
     }
 
 } else if(isset($_POST["answer"])){
+
+    $errors = [];
+
     $answer = $_POST['answer'];
     $question_id = $_POST['question_id'];
     $user_id = $_SESSION['user']['user_id'];
+
+    if(empty($answer)){
+        $errors['answer'] = "Answer is required";
+    }
+    if(!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        header("Location: /AskNest?q-id=$question_id");
+        exit;
+    }
 
     $query = $conn->prepare("INSERT INTO answers (id, answer, question_id, user_id) VALUES (NULL, '$answer', '$question_id', '$user_id')");
     $result = $query->execute();
